@@ -1,0 +1,65 @@
+# Project: Game-Data-Engineering-for-Trend-Analysis
+# Folder: ETL-Process (with subfolder ML)
+
+# === Python / PySpark ===
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+env/
+.venv/
+ENV/
+
+# PyCharm / IntelliJ
+.idea/
+*.iml
+
+# VS Code
+.vscode/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# === Spark ===
+# Spark warehouse and temp directories
+spark-warehouse/
+metastore_db/
+derby.log
+
+# Spark logs
+logs/
+*.log
+
+# Temporary Spark files
+/spark-*
+/private/var/folders/**/spark-*
+
+# === PostgreSQL JDBC Driver ===
+# You downloaded this manually – safe to ignore local copies
+postgresql-*.jar
+
+# === Data files (if any local CSVs/JSONs for testing) ===
+*.csv
+*.json
+*.parquet
+data/
+
+# === OS / Editor files ===
+.DS_Store
+Thumbs.db
+*.swp
+*~
+
+# === Environment variables / secrets ===
+.env
+secrets/
+*.pem
+*.key
+
+# === Build / Distribution ===
+dist/
+build/
+*.egg-info/
