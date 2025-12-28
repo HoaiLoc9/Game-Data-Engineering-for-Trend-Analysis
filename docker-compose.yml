@@ -1,0 +1,81 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:14
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "airflow"]
+      interval: 10s
+      retries: 5
+
+  airflow-init:
+    build: .  # Dùng custom Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+      AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - ./crawlsteam:/opt/airflow/crawlsteam
+      - ./ETL-Process:/opt/airflow/ETL-Process
+      - ./ML:/opt/airflow/ML
+      - ./SQL:/opt/airflow/SQL
+      - ./postgresql-42.7.4.jar:/opt/airflow/postgresql-42.7.4.jar
+    command: >
+      bash -c "
+      airflow db init &&
+      (airflow users list | grep -q admin) || 
+      airflow users create --username admin --password admin --firstname Admin --lastname User --role Admin --email admin@example.com
+      "
+
+  airflow-webserver:
+    build: .
+    depends_on:
+      - postgres
+      - airflow-init
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+      AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - ./crawlsteam:/opt/airflow/crawlsteam
+      - ./ETL-Process:/opt/airflow/ETL-Process
+      - ./ML:/opt/airflow/ML
+      - ./SQL:/opt/airflow/SQL
+      - ./postgresql-42.7.4.jar:/opt/airflow/postgresql-42.7.4.jar
+    ports:
+      - "8080:8080"
+    command: webserver
+
+  airflow-scheduler:
+    build: .
+    depends_on:
+      - postgres
+      - airflow-init
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+      AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - ./crawlsteam:/opt/airflow/crawlsteam
+      - ./ETL-Process:/opt/airflow/ETL-Process
+      - ./ML:/opt/airflow/ML
+      - ./SQL:/opt/airflow/SQL
+      - ./postgresql-42.7.4.jar:/opt/airflow/postgresql-42.7.4.jar
+    command: scheduler
+
+volumes:
+  postgres_data:
